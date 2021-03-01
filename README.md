@@ -10,7 +10,8 @@
 
 
 ## Main Functionalities
-
+ - Allows Magento2 merchants to integrate Tapsys Secure Checkout on their payment page.
+ - Enables administration configuration options to store credentials and set module operational status.
 
 ## Installation
 \* = in production please use the `--keep-generated` option
