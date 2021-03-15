@@ -109,7 +109,9 @@ class Response extends Base
                     $payment->setAdditionalInformation('tapsys_sig', $postData['sig']);
                     $payment->setAdditionalInformation('tapsys_reference', $postData['reference']);
                     $payment->setAdditionalInformation('tapsys_tracker', $postData['tracker']);
-                    $payment->setAdditionalInformation('tapsys_token_data', $postData['token']);
+                    if(isset($postData['token'])){
+                        $payment->setAdditionalInformation('tapsys_token_data', $postData['token']);
+                    }
                     $payment->save();
 
                     $resultRedirect->setUrl($this->_tapsysHelper->getUrl('checkout/onepage/success', ['_secure'=>true]));
