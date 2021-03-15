@@ -69,19 +69,8 @@ define(
                         success: function (apiResponse, status, xhr){
                             apiResponse = JSON.parse(apiResponse);
                             if(apiResponse.response.code === "OK"){
-                                if (typeof apiResponse.data.token !== 'undefined' && apiResponse.data.token != null){
-                                    tokenApiResponse(apiResponse);
-                                    return true;
-                                }else{
-                                    alert({
-                                        title: $.mage.__('Error'),
-                                        content: $.mage.__('Something went wrong. Please try again.'),
-                                        actions: {
-                                            always: function(){}
-                                        }
-                                    });
-                                    return false;
-                                }
+                                tokenApiResponse(apiResponse);
+                                return true;
                             }else{
                                 alert({
                                     title: $.mage.__('Error'),
@@ -115,10 +104,7 @@ define(
 
                 return {
                     'method': this.item.method,
-                    'po_number': null,
-                    'additional_data': {
-                        'tapsys_token_data': (typeof apiResponse.data.token !== 'undefined' && apiResponse.data.token != null) ? apiResponse.data.token : null
-                    }
+                    'po_number': null
                 };
             },
 
