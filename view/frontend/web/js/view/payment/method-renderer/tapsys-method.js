@@ -11,7 +11,6 @@ define(
         'mage/url'
     ],
     function ($, ko, Component, redirectOnSuccessAction, additionalValidators, alert, quote, fullScreenLoader, url) {
-        'use strict';
 
         var tokenApiResponse = ko.observableArray();
 
@@ -34,7 +33,18 @@ define(
             },
 
             tokenRequest: function() {
+                console.log(window.checkoutConfig.customerData.addresses);
                 let tokenApiUrl = window.checkoutConfig.payment.tapsys.token_api_url;
+                var billing_address = '';
+                var billing_phone = '';
+                if(window.checkoutConfig.customerData.addresses['2']){
+                  billing_address = window.checkoutConfig.customerData.addresses['2']['inline'];
+                  billing_phone = window.checkoutConfig.customerData.addresses['2']['telephone'];
+                }
+                if(window.checkoutConfig.customerData.addresses['3']){
+                  billing_address = window.checkoutConfig.customerData.addresses['3']['inline'];
+                  billing_phone = window.checkoutConfig.customerData.addresses['3']['telephone'];
+                }
                 $.ajax(
                     url.build('/rest/V1/tapsys/endpoint'),
                     {
@@ -51,8 +61,8 @@ define(
                             clientId : window.checkoutConfig.payment.tapsys.api_key,
                             clientWordPressKey : window.checkoutConfig.payment.tapsys.webhook_secret,
                             merchantId : window.checkoutConfig.payment.tapsys.merchant_id,
-                            billingAddress : window.checkoutConfig.customerData.addresses['2']['inline'],
-                            billingPhone : window.checkoutConfig.customerData.addresses['2']['telephone'],
+                            billingAddress : billing_address,
+                            billingPhone : billing_phone,
                             amount : parseInt(quote.totals().base_grand_total),
                             currency : quote.totals().quote_currency_code
                         }),
