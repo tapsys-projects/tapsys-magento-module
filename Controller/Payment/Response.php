@@ -11,6 +11,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Store\Model\StoreManagerInterface;
 use Tapsys\Checkout\Helper\Data as TapsysHelper;
+use Magento\Framework\Session\SessionManagerInterface as CoreSession;
 
 class Response extends Base
 {
@@ -19,6 +20,7 @@ class Response extends Base
      * @var OrderSender
      */
     private $orderSender;
+    protected $_coreSession;
 
     /**
      * Response constructor.
@@ -32,6 +34,7 @@ class Response extends Base
      * @param TapsysHelper $tapsysHelper
      * @param \Magento\Framework\Data\Form\FormKey\Validator $formKeyValidator
      * @param OrderSender $orderSender
+     * @param CoreSession $coreSession
      */
     public function __construct(
         Context $context,
@@ -43,7 +46,8 @@ class Response extends Base
         JsonHelper $jsonHelper,
         TapsysHelper $tapsysHelper,
         \Magento\Framework\Data\Form\FormKey\Validator $formKeyValidator,
-        OrderSender $orderSender
+        OrderSender $orderSender,
+        CoreSession $coreSession
     ) {
         parent::__construct(
             $context,
@@ -57,6 +61,7 @@ class Response extends Base
             $formKeyValidator
         );
         $this->orderSender = $orderSender;
+        $this->_coreSession = $coreSession;
     }
 
     /**
@@ -71,7 +76,10 @@ class Response extends Base
                 $order_id = $postData['order_id']; // Generally sent by gateway
                 $signature = ($postData["sig"]);
                 $reference_code = ($postData["reference"]);
-                $tracker = ($postData["tracker"]);
+                //$tracker = ($postData["tracker"]);
+                $this->_coreSession->start();
+                $tracker = $this->_coreSession->getMyVariable();
+                $this->_coreSession->unsMyVariable();
 
                 if (empty($order_id)) {
                     $resultRedirect->setUrl($this->_tapsysHelper->getUrl('checkout/onepage/failure', ['_secure' => true]));

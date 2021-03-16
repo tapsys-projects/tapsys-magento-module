@@ -1,41 +1,47 @@
 <?php
 namespace Tapsys\Checkout\Model;
 use Tapsys\Checkout\Api\EndpointInterface;
+use Tapsys\Checkout\Helper\Data as TapsysHelper;
+use Tapsys\Checkout\Model\EnvVars;
+use Magento\Framework\Session\SessionManagerInterface as CoreSession;
 
 class Endpoint implements EndpointInterface
 {
-  /**
-   * Returns greeting message to user
-   *
-   * @api
-   * @param string $url
-   * @param string $firstName
-   * @param string $lastName
-   * @param string $billingEmail
-   * @param string $environment
-   * @param string $clientId
-   * @param string $clientWordPressKey
-   * @param string $merchantId
-   * @param string $billingAddress
-   * @param string $billingPhone
-   * @param string $amount
-   * @param string $currency
-   * @return string Greeting message with users data.
-   */
-  public function data(
-    $url,
-    $firstName,
-    $lastName,
-    $billingEmail,
-    $environment,
-    $clientId,
-    $clientWordPressKey,
-    $merchantId,
-    $billingAddress,
-    $billingPhone,
-    $amount,
-    $currency
-  ) {
+    protected $_tapsysHelper;
+    protected $_coreSession;
+    /**
+     * @param TapsysHelper $tapsysHelper
+     * @param CoreSession $coreSession
+     */
+    public function __construct(
+        TapsysHelper $tapsysHelper,
+        CoreSession $coreSession
+    ) {
+        $this->_tapsysHelper = $tapsysHelper;
+        $this->_coreSession = $coreSession;
+    }
+    /**
+    * Returns greeting message to user
+    *
+    * @api
+    * @param string $firstName
+    * @param string $lastName
+    * @param string $billingEmail
+    * @param string $billingAddress
+    * @param string $billingPhone
+    * @param string $amount
+    * @param string $currency
+    * @return string Greeting message with users data.
+    */
+    public function data(
+        $firstName,
+        $lastName,
+        $billingEmail,
+        $billingAddress,
+        $billingPhone,
+        $amount,
+        $currency
+    ) {
     $curr = array(
         'AFN' => '971',
         'ALL' => '8',
@@ -303,19 +309,22 @@ class Endpoint implements EndpointInterface
         'ZWL' => '932',
         'EUR' => '978'
         );
+    $env = (bool)$this->_tapsysHelper->getStoreConfigValue('sandbox');
+    $tokenApiBaseUrl = $env ? EnvVars::SANDBOX_API_URL : EnvVars::PRODUCTION_API_URL;
+    $url = $tokenApiBaseUrl . EnvVars::INIT_TRANSACTION_ENDPOINT;
     $fields = array(
-      'url' => $url,
-      'firstName' => $firstName,
-      'lastName' => $lastName,
-      'billingEmail' => $billingEmail,
-      'environment' => $environment,
-      'clientId' => $clientId,
-      'clientWordPressKey' => $clientWordPressKey,
-      'merchantId' => $merchantId,
-      'billingAddress' => $billingAddress,
-      'billingPhone' => $billingPhone,
-      'amount' => $amount,
-      'currency' => $curr[$currency]
+        'url' => $url,
+        'firstName' => $firstName,
+        'lastName' => $lastName,
+        'billingEmail' => $billingEmail,
+        'environment' => $env ? 'sandbox' : 'production',
+        'clientId' => $env ? $this->_tapsysHelper->getStoreConfigValue('sandbox_key') : $this->_tapsysHelper->getStoreConfigValue('production_key'),
+        'clientWordPressKey' => $this->_tapsysHelper->getSharedSecret(),
+        'merchantId' => $this->_tapsysHelper->getStoreConfigValue('merchant_id'),
+        'billingAddress' => $billingAddress,
+        'billingPhone' => $billingPhone,
+        'amount' => $amount,
+        'currency' => $curr[$currency]
     );
     $fields = json_encode($fields);
     $ch = curl_init();
@@ -325,6 +334,9 @@ class Endpoint implements EndpointInterface
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
-    return $result;
+    $token = json_decode($result);
+    $this->_coreSession->start();
+    $this->_coreSession->setMyVariable($token->data->token);
+    return "OK";
   }
 }

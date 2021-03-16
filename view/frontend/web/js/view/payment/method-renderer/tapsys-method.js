@@ -33,8 +33,6 @@ define(
             },
 
             tokenRequest: function() {
-                console.log(window.checkoutConfig.customerData.addresses);
-                let tokenApiUrl = window.checkoutConfig.payment.tapsys.token_api_url;
                 var billing_address = '';
                 var billing_phone = '';
                 if(window.checkoutConfig.customerData.addresses['2']){
@@ -53,56 +51,14 @@ define(
                         dataType: 'json',
                         showLoader: true,
                         data: JSON.stringify({
-                            url: tokenApiUrl,
                             firstName : window.checkoutConfig.customerData.firstname,
                             lastName : window.checkoutConfig.customerData.lastname,
                             billingEmail : window.checkoutConfig.customerData.email,
-                            environment : window.checkoutConfig.payment.tapsys.environment,
-                            clientId : window.checkoutConfig.payment.tapsys.api_key,
-                            clientWordPressKey : window.checkoutConfig.payment.tapsys.webhook_secret,
-                            merchantId : window.checkoutConfig.payment.tapsys.merchant_id,
                             billingAddress : billing_address,
                             billingPhone : billing_phone,
                             amount : parseInt(quote.totals().base_grand_total),
                             currency : quote.totals().quote_currency_code
-                        }),
-                        success: function (apiResponse, status, xhr){
-                            apiResponse = JSON.parse(apiResponse);
-                            if(apiResponse.response.code === "OK"){
-                                if (typeof apiResponse.data.token !== 'undefined' && apiResponse.data.token != null){
-                                    tokenApiResponse(apiResponse);
-                                    return true;
-                                }else{
-                                    alert({
-                                        title: $.mage.__('Error'),
-                                        content: $.mage.__('Something went wrong. Please try again.'),
-                                        actions: {
-                                            always: function(){}
-                                        }
-                                    });
-                                    return false;
-                                }
-                            }else{
-                                alert({
-                                    title: $.mage.__('Error'),
-                                    content: $.mage.__(data["message"]),
-                                    actions: {
-                                        always: function(){}
-                                    }
-                                });
-                                return false;
-                            }
-                        },
-                        error: function (jqXhr, textStatus, errorMessage){
-                            alert({
-                                title: $.mage.__('Error'),
-                                content: $.mage.__('Something went wrong. Please try again.'),
-                                actions: {
-                                    always: function(){}
-                                }
-                            });
-                            return false;
-                        }
+                        })
                     }
                 );
             },
@@ -111,14 +67,9 @@ define(
              * Get payment method data
              */
             getData: function () {
-                var apiResponse = tokenApiResponse();
-
                 return {
                     'method': this.item.method,
-                    'po_number': null,
-                    'additional_data': {
-                        'tapsys_token_data': (typeof apiResponse.data.token !== 'undefined' && apiResponse.data.token != null) ? apiResponse.data.token : null
-                    }
+                    'po_number': null
                 };
             },
 

@@ -18,12 +18,7 @@ class Process extends Base
             if (empty($order->getId())) {
                 throw new NoSuchEntityException(__('No Order Found.'));
             }
-            $tapsysTokenData = $order->getPayment()->getAdditionalInformation('tapsys_token_data');
-
-            $order->setComment($tapsysTokenData);
-            $order->save();
-
-            $hostedUrl = $this->_tapsysHelper->constructUrl($order, $tapsysTokenData);
+            $hostedUrl = $this->_tapsysHelper->constructUrl($order);
             /* Redirect to gateway url for payment processing */
             $resultRedirect->setUrl($hostedUrl);
             return $resultRedirect;

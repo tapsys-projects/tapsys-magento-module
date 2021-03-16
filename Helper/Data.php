@@ -16,6 +16,7 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Framework\DB\Transaction;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
+use Magento\Framework\Session\SessionManagerInterface as CoreSession;
 
 class Data extends AbstractHelper
 {
@@ -28,6 +29,7 @@ class Data extends AbstractHelper
     protected $_orderRepository;
     protected $_invoiceService;
     protected $_invoiceSender;
+    protected $_coreSession;
 
     /**
      * Data constructor.
@@ -37,6 +39,7 @@ class Data extends AbstractHelper
      * @param StoreManagerInterface $storeManager
      * @param ScopeConfigInterface $scopeConfig
      * @param UrlInterface $urlInterface
+     * @param CoreSession $coreSession
      */
     public function __construct(
         Context $context,
@@ -49,7 +52,8 @@ class Data extends AbstractHelper
         OrderRepositoryInterface $orderRepository,
         InvoiceService $invoiceService,
         Transaction $transaction,
-        InvoiceSender $invoiceSender
+        InvoiceSender $invoiceSender,
+        CoreSession $coreSession
     ) {
         $this->_scopeConfig = $scopeConfig;
         $this->_orderManagement = $orderManagement;
@@ -59,6 +63,7 @@ class Data extends AbstractHelper
         $this->_invoiceService = $invoiceService;
         $this->_transaction = $transaction;
         $this->_invoiceSender = $invoiceSender;
+        $this->_coreSession = $coreSession;
         parent::__construct($context, $objectManager, $storeManager);
     }
 
@@ -96,8 +101,10 @@ class Data extends AbstractHelper
         }
     }
 
-    public function constructUrl($order, $tracker="")
+    public function constructUrl($order)
     {
+        $this->_coreSession->start();
+        $tracker = $this->_coreSession->getMyVariable();
         $baseURL = $this->getStoreConfigValue('sandbox') ? EnvVars::SANDBOX_CHECKOUT_URL : EnvVars::PRODUCTION_CHECKOUT_URL;
         $order_id = $order->getId();
         $params = array(
