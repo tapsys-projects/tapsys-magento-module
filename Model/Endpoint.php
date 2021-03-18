@@ -24,22 +24,10 @@ class Endpoint implements EndpointInterface
     * Returns greeting message to user
     *
     * @api
-    * @param string $firstName
-    * @param string $lastName
-    * @param string $billingEmail
-    * @param string $billingAddress
-    * @param string $billingPhone
-    * @param string $amount
     * @param string $currency
     * @return string Greeting message with users data.
     */
     public function data(
-        $firstName,
-        $lastName,
-        $billingEmail,
-        $billingAddress,
-        $billingPhone,
-        $amount,
         $currency
     ) {
     $curr = array(
@@ -312,18 +300,27 @@ class Endpoint implements EndpointInterface
     $env = (bool)$this->_tapsysHelper->getStoreConfigValue('sandbox');
     $tokenApiBaseUrl = $env ? EnvVars::SANDBOX_API_URL : EnvVars::PRODUCTION_API_URL;
     $url = $tokenApiBaseUrl . EnvVars::INIT_TRANSACTION_ENDPOINT;
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $cart = $objectManager->get('\Magento\Checkout\Model\Cart');
+    $grandTotal = $cart->getQuote()->getGrandTotal();
+    $billing_address = $cart->getQuote()->getBillingAddress();
+    $billing_address = $billing_address->getData();
+    $shipping_address = $cart->getQuote()->getShippingAddress();
+    $shipping_address = $shipping_address->getData();
+    if(isset($shipping_address['street']) && strlen($shipping_address['street']) > 0){$address = $shipping_address;}
+    if(isset($billing_address['street']) && strlen($billing_address['street']) > 0){$address = $billing_address;}
     $fields = array(
         'url' => $url,
-        'firstName' => $firstName,
-        'lastName' => $lastName,
-        'billingEmail' => $billingEmail,
+        'firstName' => $address['firstname'],
+        'lastName' => $address['lastname'],
+        'billingEmail' => $address['email'],
         'environment' => $env ? 'sandbox' : 'production',
         'clientId' => $env ? $this->_tapsysHelper->getStoreConfigValue('sandbox_key') : $this->_tapsysHelper->getStoreConfigValue('production_key'),
         'clientWordPressKey' => $this->_tapsysHelper->getSharedSecret(),
         'merchantId' => $this->_tapsysHelper->getStoreConfigValue('merchant_id'),
-        'billingAddress' => $billingAddress,
-        'billingPhone' => $billingPhone,
-        'amount' => $amount,
+        'billingAddress' => $address['street'] . " " . $address['city'] . " " . $address['postcode'] . " " . $address['country_id'],
+        'billingPhone' => $address['telephone'],
+        'amount' => $grandTotal,
         'currency' => $curr[$currency]
     );
     $fields = json_encode($fields);

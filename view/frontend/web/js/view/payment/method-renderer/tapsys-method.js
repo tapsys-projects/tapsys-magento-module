@@ -33,16 +33,6 @@ define(
             },
 
             tokenRequest: function() {
-                var billing_address = '';
-                var billing_phone = '';
-                if(window.checkoutConfig.customerData.addresses['2']){
-                  billing_address = window.checkoutConfig.customerData.addresses['2']['inline'];
-                  billing_phone = window.checkoutConfig.customerData.addresses['2']['telephone'];
-                }
-                if(window.checkoutConfig.customerData.addresses['3']){
-                  billing_address = window.checkoutConfig.customerData.addresses['3']['inline'];
-                  billing_phone = window.checkoutConfig.customerData.addresses['3']['telephone'];
-                }
                 $.ajax(
                     url.build('/rest/V1/tapsys/endpoint'),
                     {
@@ -51,12 +41,6 @@ define(
                         dataType: 'json',
                         showLoader: true,
                         data: JSON.stringify({
-                            firstName : window.checkoutConfig.customerData.firstname,
-                            lastName : window.checkoutConfig.customerData.lastname,
-                            billingEmail : window.checkoutConfig.customerData.email,
-                            billingAddress : billing_address,
-                            billingPhone : billing_phone,
-                            amount : parseInt(quote.totals().base_grand_total),
                             currency : quote.totals().quote_currency_code
                         })
                     }
