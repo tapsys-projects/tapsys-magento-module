@@ -307,13 +307,14 @@ class Endpoint implements EndpointInterface
     $billing_address = $billing_address->getData();
     $shipping_address = $cart->getQuote()->getShippingAddress();
     $shipping_address = $shipping_address->getData();
+    $customer_email = $cart->getQuote()->getBillingAddress()->getEmail();
     if(isset($shipping_address['street']) && strlen($shipping_address['street']) > 0){$address = $shipping_address;}
     if(isset($billing_address['street']) && strlen($billing_address['street']) > 0){$address = $billing_address;}
     $fields = array(
         'url' => $url,
         'firstName' => $address['firstname'],
         'lastName' => $address['lastname'],
-        'billingEmail' => $address['email'],
+        'billingEmail' => $customer_email,
         'environment' => $env ? 'sandbox' : 'production',
         'clientId' => $env ? $this->_tapsysHelper->getStoreConfigValue('sandbox_key') : $this->_tapsysHelper->getStoreConfigValue('production_key'),
         'clientWordPressKey' => $this->_tapsysHelper->getSharedSecret(),
