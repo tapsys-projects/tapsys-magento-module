@@ -12,6 +12,7 @@ use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Store\Model\StoreManagerInterface;
 use Tapsys\Checkout\Helper\Data as TapsysHelper;
 use Magento\Framework\Session\SessionManagerInterface as CoreSession;
+use Tapsys\Checkout\Model\EnvVars;
 
 class Response extends Base
 {
@@ -80,6 +81,21 @@ class Response extends Base
                 $this->_coreSession->start();
                 $tracker = $this->_coreSession->getMyVariable();
                 $this->_coreSession->unsMyVariable();
+                
+                $env = (bool)$this->_tapsysHelper->getStoreConfigValue('sandbox');
+                $tokenApiBaseUrl = $env ? EnvVars::SANDBOX_API_URL : EnvVars::PRODUCTION_API_URL;
+                $url = $tokenApiBaseUrl . "wordpress/validateSignature";
+                $fields = array(
+                    'beacon' => $tracker
+                );
+                $fields = json_encode($fields);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $result = curl_exec($ch);
 
                 if (empty($order_id)) {
                     $resultRedirect->setUrl($this->_tapsysHelper->getUrl('checkout/onepage/failure', ['_secure' => true]));
@@ -90,9 +106,19 @@ class Response extends Base
                 $success = false;
                 $error = null;
 
+                /*
                 if (empty($order_id) || empty($signature)) {
                     $error = __('Payment to Tapsys Failed. No data received');
                 } elseif ($this->_tapsysHelper->validateSignature($tracker, $signature) === false) {
+                    $error = __('Payment is invalid. Failed security check.');
+                } else {
+                    $success = true;
+                }
+                */
+                
+                if (empty($order_id) || empty($signature)) {
+                    $error = __('Payment to Tapsys Failed. No data received');
+                } elseif ($result != "Success") {
                     $error = __('Payment is invalid. Failed security check.');
                 } else {
                     $success = true;
