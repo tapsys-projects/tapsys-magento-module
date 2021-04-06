@@ -34,8 +34,8 @@ class CheckoutConfigProvider implements ConfigProviderInterface
         $tapsyscheckoutConfig['merchant_id'] = $this->getStoreConfigValue("merchant_id");
         $tapsyscheckoutConfig['environment'] = (bool)$this->getStoreConfigValue("sandbox") ? 'sandbox' : 'production';
         $tokenApiBaseUrl = $tapsyscheckoutConfig['sandbox'] ? EnvVars::SANDBOX_API_URL : EnvVars::PRODUCTION_API_URL;
-        $tapsyscheckoutConfig['api_key'] = $tapsyscheckoutConfig['sandbox'] ? $this->getStoreConfigValue("sandbox_key") : $this->getStoreConfigValue("production_key");
-        $tapsyscheckoutConfig['webhook_secret'] = $tapsyscheckoutConfig['sandbox'] ? $this->getStoreConfigValue("sandbox_webhook_secret") : $this->getStoreConfigValue("production_webhook_secret");
+        // $tapsyscheckoutConfig['api_key'] = $tapsyscheckoutConfig['sandbox'] ? $this->getStoreConfigValue("sandbox_key") : $this->getStoreConfigValue("production_key");
+        // $tapsyscheckoutConfig['webhook_secret'] = $tapsyscheckoutConfig['sandbox'] ? $this->getStoreConfigValue("sandbox_webhook_secret") : $this->getStoreConfigValue("production_webhook_secret");
         $tapsyscheckoutConfig['token_api_url'] = $tokenApiBaseUrl . EnvVars::INIT_TRANSACTION_ENDPOINT;
         $tapsyscheckoutConfig['order_success_message'] = $this->getStoreConfigValue("order_success_message");
         $config = [
