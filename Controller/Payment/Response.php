@@ -74,7 +74,7 @@ class Response extends Base
         if (!empty($this->getRequest()->getParams())) {
             try {
                 $postData = $this->getRequest()->getParams();
-                $order_id = $postData['order_id']; // Generally sent by gateway
+                //$order_id = $postData['order_id'];
                 $signature = ($postData["sig"]);
                 $reference_code = ($postData["reference"]);
                 //$tracker = ($postData["tracker"]);
@@ -96,6 +96,9 @@ class Response extends Base
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $result = curl_exec($ch);
+                $result = json_decode($result);
+                $order_id = $result->orderId;
+                $res = $result->status;
 
                 if (empty($order_id)) {
                     $resultRedirect->setUrl($this->_tapsysHelper->getUrl('checkout/onepage/failure', ['_secure' => true]));
@@ -118,7 +121,7 @@ class Response extends Base
                 
                 if (empty($order_id) || empty($signature)) {
                     $error = __('Payment to Tapsys Failed. No data received');
-                } elseif ($result != "Success") {
+                } elseif ($res != "Success") {
                     $error = __('Payment is invalid. Failed security check.');
                 } else {
                     $success = true;
