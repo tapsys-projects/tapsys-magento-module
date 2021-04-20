@@ -104,7 +104,9 @@ class Data extends AbstractHelper
     public function constructUrl($order)
     {
         $this->_coreSession->start();
-        $tracker = $this->_coreSession->getMyVariable();
+        $my_variable = $this->_coreSession->getMyVariable();
+        $my_variable = explode("-_-", $my_variable);
+        $tracker = $my_variable[0];
         $baseURL = $this->getStoreConfigValue('sandbox') ? EnvVars::SANDBOX_CHECKOUT_URL : EnvVars::PRODUCTION_CHECKOUT_URL;
         $order_id = $order->getId();
         $params = array(
