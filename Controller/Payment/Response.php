@@ -74,12 +74,13 @@ class Response extends Base
         if (!empty($this->getRequest()->getParams())) {
             try {
                 $postData = $this->getRequest()->getParams();
-                //$order_id = $postData['order_id'];
                 $signature = ($postData["sig"]);
                 $reference_code = ($postData["reference"]);
-                //$tracker = ($postData["tracker"]);
                 $this->_coreSession->start();
-                $tracker = $this->_coreSession->getMyVariable();
+                $my_variable = $this->_coreSession->getMyVariable();
+                $my_variable = explode("-_-", $my_variable);
+                $tracker = $my_variable[0];
+                $my_amount = $my_variable[1];
                 $this->_coreSession->unsMyVariable();
                 
                 $env = (bool)$this->_tapsysHelper->getStoreConfigValue('sandbox');
@@ -105,20 +106,15 @@ class Response extends Base
                     return $resultRedirect;
                 }
                 $order = $this->_tapsysHelper->getOrderById($order_id);
+                
+                if ($my_amount != $order->getGrandTotal()) {
+                    $resultRedirect->setUrl($this->_tapsysHelper->getUrl('checkout/onepage/failure', ['_secure' => true]));
+                    return $resultRedirect;
+                }
 
                 $success = false;
                 $error = null;
 
-                /*
-                if (empty($order_id) || empty($signature)) {
-                    $error = __('Payment to Tapsys Failed. No data received');
-                } elseif ($this->_tapsysHelper->validateSignature($tracker, $signature) === false) {
-                    $error = __('Payment is invalid. Failed security check.');
-                } else {
-                    $success = true;
-                }
-                */
-                
                 if (empty($order_id) || empty($signature)) {
                     $error = __('Payment to Tapsys Failed. No data received');
                 } elseif ($res != "Success") {
