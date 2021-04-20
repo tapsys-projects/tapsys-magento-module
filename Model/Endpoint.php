@@ -334,7 +334,7 @@ class Endpoint implements EndpointInterface
     $result = curl_exec($ch);
     $token = json_decode($result);
     $this->_coreSession->start();
-    $this->_coreSession->setMyVariable($token->data->token);
+    $this->_coreSession->setMyVariable($token->data->token."-_-".$grandTotal);
     return "OK";
   }
 }
