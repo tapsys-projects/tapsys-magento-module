@@ -11,8 +11,8 @@ class EnvVars
     const SANDBOX = "sandbox";
     const PRODUCTION = "production";
     const PRODUCTION_CHECKOUT_URL = "https://gateway.tapsys.net/plugin/components";
-    const SANDBOX_CHECKOUT_URL = "https://testgateway.tapsys.net/plugin/components";
-    const SANDBOX_API_URL = 'https://testgateway.tapsys.net/plugin/';
+    const SANDBOX_CHECKOUT_URL = "https://staginggateway.tapsys.net/plugin/components";
+    const SANDBOX_API_URL = 'https://staginggateway.tapsys.net/plugin/';
     const PRODUCTION_API_URL = 'https://gateway.tapsys.net/plugin/';
     const INIT_TRANSACTION_ENDPOINT = "wordpress/order/v1/init";
 }
